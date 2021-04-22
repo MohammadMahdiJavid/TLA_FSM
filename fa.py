@@ -10,13 +10,20 @@ class FA (Automaton):
     @classmethod
     def remove_paranthesis(cls, string):
         chars = ['(', ')', '{', '}', '[', ']']
-        for char in chars:
-            string = string.strip(char)
-        return string
+        # for char in chars:
+        #     string = string.strip(char)
+        return string[1:len(string) - 1]
 
     @classmethod
     def remove_space_comma(cls, string):
         strings = string.split(',')
+        state_set = set()
+        if "{" or "}" in string:
+            for s in strings:
+                # s = s.replace("|" , ",")   
+                s = s.strip(' ')
+                state_set.add(s)
+            return state_set
         return set(string.strip(' ') for string in strings)
 
     @classmethod

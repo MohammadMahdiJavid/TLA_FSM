@@ -140,7 +140,7 @@ class NFA (FA):
         elif len(states) == 1:
             return next(iter(states))
         else:
-            return "{" + ", ".join(sorted(states)) + "}"
+            return "{" + "| ".join(sorted(states)) + "}"
 
     @classmethod
     def _enqueue_next_nfa_current_states(cls, nfa, current_states,
@@ -213,6 +213,6 @@ class NFA (FA):
             cls._enqueue_next_nfa_current_states(
                 nfa, current_states, current_state_name, state_queue,
                 dfa_transitions)
-        cls._parse_create_DFA(
+        return cls._parse_create_DFA(
             dfa_states, dfa_symbols, dfa_transitions, dfa_initial_state, dfa_final_states)
-        return
+        
