@@ -186,7 +186,7 @@ class NFA (FA):
                    final_states=dfa_final_states)
 
     @classmethod
-    def createEquivalentDFA(cls, nfa):
+    def convert_NFA_to_DFA(cls, nfa):
         """
             Initialize this DFA as one equivalent to the given NFA.
             Trap states : $
@@ -215,4 +215,9 @@ class NFA (FA):
                 dfa_transitions)
         return cls._parse_create_DFA(
             dfa_states, dfa_symbols, dfa_transitions, dfa_initial_state, dfa_final_states)
+
+    def createEquivalentDFA(self):
+        return NFA.convert_NFA_to_DFA(self)
+
+    
         

@@ -1,4 +1,5 @@
 from fa import FA
+from automata.fa.dfa import DFA
 
 
 class DFA(FA):
