@@ -1,3 +1,5 @@
+import os
+import graphviz
 from fa import FA
 from automata.fa.dfa import DFA
 
@@ -51,3 +53,33 @@ class DFA(FA):
             if not is_valid:
                 return last_states, False
         return last_states, True
+
+    def showSchematicDFA(self, filename):
+        g = graphviz.Digraph(format='png')
+        g.node('fake', style='invisible')
+        for state in self.states:
+            if state == self.initial_state:
+                if state in self.final_states:
+                    g.node(state, root='true',
+                           shape='doublecircle')
+                else:
+                    g.node(state, root='true')
+            elif state in self.final_states:
+                g.node(state, shape='doublecircle')
+            else:
+                g.node(state)
+
+        g.edge('fake', self.initial_state, style='bold')
+        for start in self.transitions:
+            for label in self.transitions[start]:
+                for dst in self.transitions[start][label]:
+                    g.edge(start, dst, label=label)
+
+        DIRECTORY_NAME = "Outputs"
+        if not os.path.exists(DIRECTORY_NAME):
+            os.makedirs(DIRECTORY_NAME)
+
+        g.render(directory='.\\Outputs\\', view=True,
+                 format='png', filename=filename + '.gv')
+        g.render(directory='.\\Outputs\\', view=True,
+                 format='pdf', filename=filename + '.gv')
