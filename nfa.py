@@ -93,7 +93,7 @@ class NFA (FA):
 
         return next_current_states
 
-    def isAcceptByNFA_stepwise(self, input_str):
+    def _isAcceptByNFA_stepwise(self, input_str):
         """
             Check if the given string is accepted by this NFA.
             Yield the current configuration of the NFA at each step.
@@ -104,7 +104,7 @@ class NFA (FA):
         for input_symbol in input_str:
             current_states = self._get_next_current_states(
                 current_states, input_symbol)
-            yield current_states, True
+            yield current_states, len(current_states) > 0
 
         if not (current_states & self.final_states):
             print('the NFA stopped on all non-final states ({})'.format(
@@ -116,7 +116,7 @@ class NFA (FA):
             Check if the given string is accepted by this automaton.
             Return the automaton's final configuration if this string is valid.
         """
-        validation_generator = self.isAcceptByNFA_stepwise(input_str)
+        validation_generator = self._isAcceptByNFA_stepwise(input_str)
         for last_states, is_valid in validation_generator:
             if not is_valid:
                 return last_states, False
@@ -218,6 +218,3 @@ class NFA (FA):
 
     def createEquivalentDFA(self):
         return NFA.convert_NFA_to_DFA(self)
-
-    
-        

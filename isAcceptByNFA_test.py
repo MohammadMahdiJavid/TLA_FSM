@@ -42,3 +42,5 @@ def test_accept_string():
     assert not is_valid
     last_states, is_valid = nfa.isAcceptByNFA('aa')
     assert not is_valid
+    last_states, is_valid = nfa.isAcceptByNFA('cabc')
+    assert not is_valid

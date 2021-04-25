@@ -22,4 +22,3 @@ def test_Equivale1():
               initial_state=initial_state,
               final_states=final_states,)
     dfa = nfa.createEquivalentDFA()
-    print()
