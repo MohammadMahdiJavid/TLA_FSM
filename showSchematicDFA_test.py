@@ -4,7 +4,7 @@ from dfa import DFA
 
 def test_showSchematicDFA_1():
     states = "{s0, s1, s2, s3, s4}"
-    input_symbols = "{5c, 10c, gum}"
+    input_symbols = "{5c, 10c}"
     final_states = "{s0, s2}"
     transitions = ['s0, s1, 5c',
                    's1, s2, 5c',
@@ -15,7 +15,7 @@ def test_showSchematicDFA_1():
                    's2, s3, 10c',
                    's2, s3, 5c',
                    's3, s3, 5c',
-                   's3, s0, gum']
+                   's3, s0, 10c']
     initial_state = 's0'
     dfa = DFA(states=states,
               transitions=transitions,

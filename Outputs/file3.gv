@@ -1,10 +1,10 @@
 digraph {
 	fake [style=invisible]
-	s1
+	s3
 	s2 [shape=doublecircle]
+	s1
 	s4
 	s0 [root=true shape=doublecircle]
-	s3
 	fake -> s0 [style=bold]
 	s0 -> s1 [label="5c"]
 	s0 -> s4 [label="10c"]
