@@ -20,12 +20,6 @@ class DFA(FA):
 
         return next(iter(self.transitions[current_state][input_symbol]))
 
-    def _check_for_input_rejection(self, current_state):
-        """Raise an error if the given config indicates rejected input."""
-        # if current_state not in self.final_states:
-        # return len(current_state & self.final_states) > 0
-        # return
-        pass
 
     def _isAcceptByDFA_stepwise(self, input_str):
         """
