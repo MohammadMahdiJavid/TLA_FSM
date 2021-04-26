@@ -38,3 +38,7 @@ class Automaton:
     def __eq__(self, other):
         """Check if two automata are equal."""
         return vars(self) == vars(other)
+
+    def copy(self):
+        """Create a deep copy of the automaton."""
+        return self.__class__(**vars(self))
