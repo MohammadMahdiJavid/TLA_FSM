@@ -1,0 +1,37 @@
+digraph {
+	fake [style=invisible]
+	q4
+	q6 [shape=doublecircle]
+	q0 [root=true]
+	"$"
+	"{q3, q6}" [shape=doublecircle]
+	q2
+	"{q1, q2, q5}" [shape=doublecircle]
+	q5
+	"{q1, q2}" [shape=doublecircle]
+	"{q1, q2, q4}" [shape=doublecircle]
+	q3 [shape=doublecircle]
+	fake -> q0 [style=bold]
+	q0 -> "$" [label=b]
+	q0 -> "{q1, q2}" [label=a]
+	"$" -> "$" [label=b]
+	"$" -> "$" [label=a]
+	"{q1, q2}" -> "{q1, q2, q5}" [label=b]
+	"{q1, q2}" -> q3 [label=a]
+	"{q1, q2, q5}" -> "{q1, q2, q5}" [label=b]
+	"{q1, q2, q5}" -> "{q3, q6}" [label=a]
+	q3 -> q4 [label=b]
+	q3 -> q2 [label=a]
+	"{q3, q6}" -> "{q1, q2, q4}" [label=b]
+	"{q3, q6}" -> q2 [label=a]
+	q4 -> "$" [label=b]
+	q4 -> "$" [label=a]
+	q2 -> q5 [label=b]
+	q2 -> q3 [label=a]
+	"{q1, q2, q4}" -> "{q1, q2, q5}" [label=b]
+	"{q1, q2, q4}" -> q3 [label=a]
+	q5 -> "$" [label=b]
+	q5 -> q6 [label=a]
+	q6 -> "{q1, q2}" [label=b]
+	q6 -> "$" [label=a]
+}

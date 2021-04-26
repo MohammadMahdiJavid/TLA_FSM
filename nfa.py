@@ -1,3 +1,6 @@
+import os
+import graphviz
+from PySimpleAutomata import automata_IO
 from os import stat
 from dfa import DFA
 from fa import FA
@@ -71,6 +74,8 @@ class NFA (FA):
             state = stack.pop()
             if state not in encountered_states:
                 encountered_states.add(state)
+                if not state in self.transitions:
+                    continue
                 if '' in self.transitions[state]:
                     stack.extend(self.transitions[state][''])
 
@@ -83,6 +88,8 @@ class NFA (FA):
         next_current_states = set()
 
         for current_state in current_states:
+            if not current_state in self.transitions:
+                continue
             symbol_end_states = self.transitions[current_state].get(
                 input_symbol)
             if not symbol_end_states:
@@ -140,7 +147,7 @@ class NFA (FA):
         elif len(states) == 1:
             return next(iter(states))
         else:
-            return "{" + "| ".join(sorted(states)) + "}"
+            return "{" + ", ".join(sorted(states)) + "}"
 
     @classmethod
     def _enqueue_next_nfa_current_states(cls, nfa, current_states,
@@ -218,3 +225,41 @@ class NFA (FA):
 
     def createEquivalentDFA(self):
         return NFA.convert_NFA_to_DFA(self)
+
+    def showSchematicNFA(self, filename):
+        g = graphviz.Digraph(format='png')
+
+        fakes = []
+        initial_states = {self.initial_state}
+        for i in range(len(initial_states)):
+            fakes.append('fake' + str(i))
+            g.node('fake' + str(i), style='invisible')
+
+        for state in self.states:
+            if state in initial_states:
+                if state in self.final_states:
+                    g.node(str(state), root='true',
+                           shape='doublecircle')
+                else:
+                    g.node(str(state), root='true')
+            elif state in self.final_states:
+                g.node(str(state), shape='doublecircle')
+            else:
+                g.node(str(state))
+
+        for initial_state in initial_states:
+            g.edge(fakes.pop(), str(initial_state), style='bold')
+
+        for start in self.transitions:
+            for label in self.transitions[start]:
+                for dst in self.transitions[start][label]:
+                    g.edge(start, dst, label if label else "λ")
+
+        DIRECTORY_NAME = "Outputs"
+        if not os.path.exists(DIRECTORY_NAME):
+            os.makedirs(DIRECTORY_NAME)
+
+        g.render(directory='.\\Outputs\\', view=True,
+                 format='png', filename=filename + '.gv')
+        g.render(directory='.\\Outputs\\', view=True,
+                 format='pdf', filename=filename + '.gv')
