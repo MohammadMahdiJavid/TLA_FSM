@@ -109,13 +109,13 @@ class DFA(FA):
         new_dfa = DFA(self._parse_set(self.states), self._parse_transitions(self.transitions), str(
             self.initial_state), self._parse_set(self.final_states), self._parse_set(self.input_symbols))
         new_dfa._remove_unreachable_states()
-        states_table = new_dfa._create_markable_states_table()
-        new_dfa._mark_states_table_first(states_table)
-        new_dfa._mark_states_table_second(states_table)
-        new_dfa._join_non_marked_states(states_table)
+        states_table = new_dfa.initialize_states_table()
+        new_dfa.check_final_and_non_finals(states_table)
+        new_dfa.check_remained_mergable_tuple(states_table)
+        new_dfa.union_unchecked_marked_states(states_table)
         return new_dfa
 
-    def _compute_reachable_states(self):
+    def retrieve_reachable_states(self):
         """Compute the states which are reachable from the initial state."""
         reachable_states = set()
         states_to_check = queue.Queue()
@@ -132,28 +132,14 @@ class DFA(FA):
 
     def _remove_unreachable_states(self):
         """Remove states which are not reachable from the initial state."""
-        reachable_states = self._compute_reachable_states()
+        reachable_states = self.retrieve_reachable_states()
         unreachable_states = self.states - reachable_states
         for state in unreachable_states:
             self.states.remove(state)
             del self.transitions[state]
 
-    def _compute_reachable_states(self):
-        """Compute the states which are reachable from the initial state."""
-        reachable_states = set()
-        states_to_check = queue.Queue()
-        states_checked = set()
-        states_to_check.put(self.initial_state)
-        while not states_to_check.empty():
-            state = states_to_check.get()
-            reachable_states.add(state)
-            for symbol, dst_state in self.transitions[state].items():
-                if next(iter(dst_state)) not in states_checked:
-                    states_to_check.put(next(iter(dst_state)))
-            states_checked.add(state)
-        return reachable_states
 
-    def _create_markable_states_table(self):
+    def initialize_states_table(self):
         """
         Create a "markable table" with all combinatations of two states.
 
@@ -166,7 +152,7 @@ class DFA(FA):
                 table[frozenset((states_list[j], states_list[i]))] = False
         return table
 
-    def _mark_states_table_first(self, table):
+    def check_final_and_non_finals(self, table):
         """Mark pairs of states if one is final and one is not."""
         for s in table:
             x = list(s)
@@ -178,7 +164,7 @@ class DFA(FA):
         #         if any((x not in self.final_states for x in s)):
         #             table[s] = True
 
-    def _mark_states_table_second(self, table):
+    def check_remained_mergable_tuple(self, table):
         """
         Mark additional state pairs.
 
@@ -209,7 +195,7 @@ class DFA(FA):
                 unchecked.append(f_set)
         return unchecked
 
-    def _join_non_marked_states(self, table):
+    def union_unchecked_marked_states(self, table):
         """Join all overlapping non-marked pairs of states to a new state."""
         non_marked_states = set(self.get_unchecked_combinations(table))
         changed = True
