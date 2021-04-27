@@ -1,4 +1,5 @@
 import os
+from path import Path
 import graphviz
 from PySimpleAutomata import automata_IO
 from os import stat
@@ -263,3 +264,84 @@ class NFA (FA):
                  format='png', filename=filename + '.gv')
         g.render(directory='.\\Outputs\\', view=True,
                  format='pdf', filename=filename + '.gv')
+
+    def IsAcceptByNFA(self, input_str):
+        return self.isAcceptByNFA(input_str)
+
+    def _get_next_current_states_path(self, current_states, input_symbol):
+        """
+            Return the next set of current states given the current set.
+        """
+        result = set()
+
+        for current_state in current_states:
+            next_current_states = set()
+            if not current_state.state in self.transitions:
+                continue
+            symbol_end_states = self.transitions[current_state.state].get(
+                input_symbol)
+            if not symbol_end_states:
+                continue
+            for end_state in symbol_end_states:
+                next_current_states.update(self._get_lambda_closure(end_state))
+
+            for next in next_current_states:
+                l = current_state.path[::]
+                l.append(input_symbol)
+                result.add(Path(next, input_symbol, l))
+
+        return result
+
+    def _clean_path(self, path):
+        pass
+
+    def _add_final(self, result, state):
+        result.append("".join(self._clean_path(state.path)) + "*")
+        if state.state in self.transitions:
+            for label in self.transitions[state.state]:
+                for dst in self.transitions[state.state][label]:
+                    if state.state == dst:
+                        result.append(f"{label}*")
+
+    def findRegExp(self):
+        # self.new_method()
+
+        # while True :
+        new_initial = False
+        for start in self.transitions:
+            for label, dst in self.transitions[start].items():
+                if dst == self.initial_state:
+                    new_initial = True
+                    break
+        if new_initial:
+            start_name = 'NEWS'
+            self.transitions[start_name] = {"": {self.initial_state}}
+            self.initial_state = start_name
+        if len(self.final_states) == 1:
+            if not next(iter(self.final_states)) in self.transitions:
+                pass
+        else:
+            for final_state in self.final_states:
+                new_final_name = 'NEWF'
+                self.transitions[new_final_name] = self.transitions.get(
+                    new_final_name, {"": {final_state}})
+            self.final_states = {new_final_name}
+
+    def new_method(self):
+        result = []
+        initial_states_set = self._get_lambda_closure(self.initial_state)
+        initial_states = set()
+        for initial_state in initial_states_set:
+            initial_states.add(Path(initial_state, None, []))
+        state_queue = queue.Queue()
+        state_queue.put(initial_states)
+        while not state_queue.empty():
+            current_states = state_queue.get()
+            for input_symbol in self.input_symbols:
+                next_states = self._get_next_current_states_path(
+                    current_states, input_symbol)
+                for state in next_states:
+                    if state.state in self.final_states:
+                        self._add_final(result, state)
+                if len(next_states) > 0:
+                    state_queue.put(next_states)
