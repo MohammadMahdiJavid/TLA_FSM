@@ -198,21 +198,22 @@ class DFA(FA):
     def union_unchecked_marked_states(self, table):
         """Join all overlapping non-marked pairs of states to a new state."""
         non_marked_states = set(self.get_unchecked_combinations(table))
-        changed = True
-        while changed:
-            changed = False
-            for s, s2 in itertools.combinations(non_marked_states, 2):
-                if s2.isdisjoint(s):
+        can_iterate = True
+        while can_iterate:
+            can_iterate = False
+            for f_union, s_union in itertools.combinations(non_marked_states, 2):
+                # check if they are seperated
+                if s_union.isdisjoint(f_union):
                     continue
                 # merge them!
-                s3 = s.union(s2)
+                unioned_f_s = f_union.union(s_union)
                 # remove the old ones
-                non_marked_states.remove(s)
-                non_marked_states.remove(s2)
+                non_marked_states.remove(f_union)
+                non_marked_states.remove(s_union)
                 # add the new one
-                non_marked_states.add(s3)
+                non_marked_states.add(unioned_f_s)
                 # set the changed flag
-                changed = True
+                can_iterate = True
                 break
         # finally adjust the DFA
         for s in non_marked_states:
