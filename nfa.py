@@ -323,22 +323,90 @@ class NFA (FA):
         else:
             for final_state in self.final_states:
                 new_final_name = 'NEWF'
-                self.transitions[new_final_name] = self.transitions.get(
-                    new_final_name, {"": {final_state}})
+                if self.transitions[final_state].get(""):
+                    self.transitions[final_state][""].add(new_final_name)
+                else:
+                    self.transitions[final_state][""] = {new_final_name}
+                # self.transitions[new_final_name] = self.transitions.get(
+                #     new_final_name, {"": {final_state}})
             self.final_states = {new_final_name}
+        print()
+
+    def get_incoming_edges(self, middle_state):
+        states = set()
+        for state in self.transtions:
+            for alphabet in self.transitions[state]:
+                if middle_state in self.transitions[state][alphabet] and state != middle_state:
+                    states.add(tuple(state, alphabet))
+        return states
+
+    def get_outgoing_edges(self, middle_state):
+        states = set()
+        for alphabet in self.transitions[middle_state]:
+            for s in self.transitions[middle_state][alphabet]:
+                if s != middle_state:
+                    states.add(tuple(s, alphabet))
+        return states
+
+    def delete_all_related_to_middle_state(self, middle_state):
+        for state in self.transitions:
+            for alphaet, neighbors in self.transitions.items():
+                if middle_state in neighbors:
+                    neighbors.remove(middle_state)
+
+    def state_removal(self):
+        middle_state = "q1"
+        incoming = self.get_incoming_edges(middle_state)
+        outgoing = self.get_outgoing_edges(middle_state)
+        while middle_state:
+            for income in incoming:
+                for outgo in outgoing:
+                    traverese_income_to_outgo(income, outgo)
+                    # return answer how to go from income to outgo
+            self.states.remove(middle_state)
+            del self.transitions[middle_state]
+            self.delete_all_related_to_middle_state(middle_state)
+            middle_state=self.pick_non_final_initial_state()
+
+    def pick_non_final_initial_state(self):
+        if len(self.states) <= 3:
+            return False
+        states=list(self.states)
+        state=states[0]
+        i=0
+        while state in self.final_states or state == self.initial_state:
+            i += 1
+            state=states[i]
+            break
+        return state
+    def get_self_loop_string(self, state):
+        alphabets=set()
+        for i in self.transitions[state]:
+            if state in self.transitions[state][i]:
+                alphabets.add(i)
+        if len(alphabets) == 0:
+            return ""
+        elif len(alphabets) == 1:
+            return f"{next(iter(alphabets))}*"
+        else:
+            return "(" + " + ".join(alphabets) + ")*"
+    def traverese_income_to_outgo(self, middle_state, income, outgo):
+        loop_inside=self.get_self_loop_string(middle_state)
+        self.transitions[income[0]
+            ][f"{income[1]}{loop_inside}{outgo[1]}"]=outgo[0]
 
     def new_method(self):
-        result = []
-        initial_states_set = self._get_lambda_closure(self.initial_state)
-        initial_states = set()
+        result=[]
+        initial_states_set=self._get_lambda_closure(self.initial_state)
+        initial_states=set()
         for initial_state in initial_states_set:
             initial_states.add(Path(initial_state, None, []))
-        state_queue = queue.Queue()
+        state_queue=queue.Queue()
         state_queue.put(initial_states)
         while not state_queue.empty():
-            current_states = state_queue.get()
+            current_states=state_queue.get()
             for input_symbol in self.input_symbols:
-                next_states = self._get_next_current_states_path(
+                next_states=self._get_next_current_states_path(
                     current_states, input_symbol)
                 for state in next_states:
                     if state.state in self.final_states:

@@ -45,6 +45,10 @@ dfa = DFA(states=states,
           transitions=transitions,
           initial_state=initial_state,
           final_states=final_states)
+for state in dfa.transitions:
+    for alphaet, neighbors in dfa.transitions[state].items():
+        if "q1" in neighbors:
+            neighbors.remove("q1")
 new_dfa = dfa.minify()
 
 # @staticmethod
