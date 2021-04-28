@@ -1,5 +1,4 @@
 import os
-from path import Path
 import graphviz
 from PySimpleAutomata import automata_IO
 from os import stat
@@ -59,14 +58,7 @@ class NFA (FA):
             return False
         return True
 
-    def _get_lambda_closure(self, start_state):
-        """
-            Return the lambda closure for the given state.
-
-            The lambda closure of a state q is the set containing q, along with
-            every state that can be reached from q by following only lambda
-            transitions.
-        """
+    def _get_lambda(self, start_state):
         stack = []
         encountered_states = set()
         stack.append(start_state)
@@ -83,9 +75,6 @@ class NFA (FA):
         return encountered_states
 
     def _get_next_current_states(self, current_states, input_symbol):
-        """
-            Return the next set of current states given the current set.
-        """
         next_current_states = set()
 
         for current_state in current_states:
@@ -97,16 +86,12 @@ class NFA (FA):
                 continue
             for end_state in symbol_end_states:
                 next_current_states.update(
-                    self._get_lambda_closure(end_state))
+                    self._get_lambda(end_state))
 
         return next_current_states
 
     def _isAcceptByNFA_stepwise(self, input_str):
-        """
-            Check if the given string is accepted by this NFA.
-            Yield the current configuration of the NFA at each step.
-        """
-        current_states = self._get_lambda_closure(self.initial_state)
+        current_states = self._get_lambda(self.initial_state)
         yield current_states, True
 
         for input_symbol in input_str:
@@ -120,10 +105,6 @@ class NFA (FA):
             yield current_states, False
 
     def isAcceptByNFA(self, input_str):
-        """
-            Check if the given string is accepted by this automaton.
-            Return the automaton's final configuration if this string is valid.
-        """
         validation_generator = self._isAcceptByNFA_stepwise(input_str)
         for last_states, is_valid in validation_generator:
             if not is_valid:
@@ -227,7 +208,7 @@ class NFA (FA):
     def createEquivalentDFA(self):
         return NFA.convert_NFA_to_DFA(self)
 
-    def showSchematicNFA(self, filename):
+    def showSchematicNFA(self):
         g = graphviz.Digraph(format='png')
 
         fakes = []
@@ -259,6 +240,10 @@ class NFA (FA):
         DIRECTORY_NAME = "Outputs"
         if not os.path.exists(DIRECTORY_NAME):
             os.makedirs(DIRECTORY_NAME)
+        filename = max(os.listdir(DIRECTORY_NAME))
+        filename = filename.split('.')[0]
+        filename = int(filename.split('file')[1]) + 1
+        filename = f'file{filename}'
 
         g.render(directory='.\\Outputs\\', view=True,
                  format='png', filename=filename + '.gv')
@@ -283,7 +268,7 @@ class NFA (FA):
             if not symbol_end_states:
                 continue
             for end_state in symbol_end_states:
-                next_current_states.update(self._get_lambda_closure(end_state))
+                next_current_states.update(self._get_lambda(end_state))
 
             for next in next_current_states:
                 l = current_state.path[::]
@@ -304,112 +289,113 @@ class NFA (FA):
                         result.append(f"{label}*")
 
     def findRegExp(self):
-        # self.new_method()
-
-        # while True :
         new_initial = False
-        for start in self.transitions:
+        for start in self.transitions:  # in-degree 0
             for label, dst in self.transitions[start].items():
-                if dst == self.initial_state:
+                if self.initial_state in dst:
                     new_initial = True
                     break
         if new_initial:
             start_name = 'NEWS'
             self.transitions[start_name] = {"": {self.initial_state}}
             self.initial_state = start_name
-        if len(self.final_states) == 1:
-            if not next(iter(self.final_states)) in self.transitions:
-                pass
-        else:
+            self.states.add(start_name)
+        new_final = True
+        if len(self.final_states) == 1:  # final state ye done bashe
+            if not next(iter(self.final_states)) in self.transitions:  # out-degree 0
+                new_final = False
+        if new_final:
             for final_state in self.final_states:
                 new_final_name = 'NEWF'
                 if self.transitions[final_state].get(""):
                     self.transitions[final_state][""].add(new_final_name)
                 else:
                     self.transitions[final_state][""] = {new_final_name}
-                # self.transitions[new_final_name] = self.transitions.get(
-                #     new_final_name, {"": {final_state}})
+            self.states.add(new_final_name)
             self.final_states = {new_final_name}
-        print()
+        self.state_removal()
+        self.showSchematicNFA()
+        key = next(iter(self.transitions.keys()))
+        final = set([next(iter(val))
+                     for val in self.transitions[key].values() if len(val) != 0]).pop()
+        label_final = self._get_final_label(final, key)
+        self.transitions[key] = {label_final: {final}}
+        self.showSchematicNFA()
+
+    def _get_final_label(self, final, key):
+        result = []
+        for label in self.transitions[key]:
+            if final in self.transitions[key][label]:
+                result.append(f'({label})')
+        return " + ".join(result)
 
     def get_incoming_edges(self, middle_state):
         states = set()
-        for state in self.transtions:
-            for alphabet in self.transitions[state]:
-                if middle_state in self.transitions[state][alphabet] and state != middle_state:
-                    states.add(tuple(state, alphabet))
+        for start in self.transitions:
+            for alphabet in self.transitions[start]:
+                # middle state tosh nabod
+                if not middle_state in self.transitions[start][alphabet]:
+                    continue
+                if start == middle_state:  # self loop
+                    continue
+                states.add((start, alphabet))
         return states
 
     def get_outgoing_edges(self, middle_state):
         states = set()
         for alphabet in self.transitions[middle_state]:
-            for s in self.transitions[middle_state][alphabet]:
-                if s != middle_state:
-                    states.add(tuple(s, alphabet))
+            for dst in self.transitions[middle_state][alphabet]:
+                if dst != middle_state:
+                    states.add((dst, alphabet))
         return states
 
     def delete_all_related_to_middle_state(self, middle_state):
         for state in self.transitions:
-            for alphaet, neighbors in self.transitions.items():
+            for alphaet, neighbors in self.transitions[state].items():
                 if middle_state in neighbors:
                     neighbors.remove(middle_state)
 
     def state_removal(self):
-        middle_state = "q1"
-        incoming = self.get_incoming_edges(middle_state)
-        outgoing = self.get_outgoing_edges(middle_state)
+        middle_state = '4'
+        # self.pick_non_final_initial_state()
         while middle_state:
-            for income in incoming:
-                for outgo in outgoing:
-                    traverese_income_to_outgo(income, outgo)
+            '''
+                1- self-loop
+            '''
+            for income in self.get_incoming_edges(middle_state):  # income : (state, label)
+                # outgo : (state, label)
+                for outgo in self.get_outgoing_edges(middle_state):
+                    self.traverese_income_to_outgo(middle_state, income, outgo)
                     # return answer how to go from income to outgo
             self.states.remove(middle_state)
             del self.transitions[middle_state]
             self.delete_all_related_to_middle_state(middle_state)
-            middle_state=self.pick_non_final_initial_state()
+            middle_state = self.pick_non_final_initial_state()
 
     def pick_non_final_initial_state(self):
-        if len(self.states) <= 3:
-            return False
-        states=list(self.states)
-        state=states[0]
-        i=0
-        while state in self.final_states or state == self.initial_state:
-            i += 1
-            state=states[i]
-            break
-        return state
-    def get_self_loop_string(self, state):
-        alphabets=set()
-        for i in self.transitions[state]:
-            if state in self.transitions[state][i]:
-                alphabets.add(i)
-        if len(alphabets) == 0:
+        if len(self.states) < 3:
             return ""
-        elif len(alphabets) == 1:
-            return f"{next(iter(alphabets))}*"
-        else:
-            return "(" + " + ".join(alphabets) + ")*"
-    def traverese_income_to_outgo(self, middle_state, income, outgo):
-        loop_inside=self.get_self_loop_string(middle_state)
-        self.transitions[income[0]
-            ][f"{income[1]}{loop_inside}{outgo[1]}"]=outgo[0]
+        for state in self.states:
+            if state in self.final_states:
+                continue
+            if state == self.initial_state:
+                continue
+            return state
 
-    def new_method(self):
-        result=[]
-        initial_states_set=self._get_lambda_closure(self.initial_state)
-        initial_states=set()
-        for initial_state in initial_states_set:
-            initial_states.add(Path(initial_state, None, []))
-        state_queue=queue.Queue()
-        state_queue.put(initial_states)
-        while not state_queue.empty():
-            current_states=state_queue.get()
-            for input_symbol in self.input_symbols:
-                next_states=self._get_next_current_states_path(
-                    current_states, input_symbol)
-                for state in next_states:
-                    if state.state in self.final_states:
-                        self._add_final(result, state)
-                if len(next_states) > 0:
-                    state_queue.put(next_states)
+    def get_self_loop_string(self, state):
+        alphabets = set()
+        for label, dst in self.transitions[state].items():
+            if state in dst:
+                alphabets.add(label)
+        return "" if len(alphabets) == 0 else \
+            f"({alphabets.pop()})*" if len(alphabets) == 1 else \
+            f"({ ' + '.join(alphabets)})*"
+
+    def traverese_income_to_outgo(self, middle_state, income, outgo):
+        loop_inside = self.get_self_loop_string(middle_state)
+        new_connected_label = f"{income[1]}{loop_inside}{outgo[1]}"
+        start_state = self.transitions[income[0]]
+        if new_connected_label in start_state:
+            start_state[new_connected_label].add(outgo[0])
+        else:
+            start_state[new_connected_label] = {outgo[0]}

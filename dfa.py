@@ -20,7 +20,6 @@ class DFA(FA):
 
         return next(iter(self.transitions[current_state][input_symbol]))
 
-
     def _isAcceptByDFA_stepwise(self, input_str):
         """
             Check if the given string is accepted by this DFA.
@@ -50,7 +49,7 @@ class DFA(FA):
                 return last_states, False
         return last_states, True
 
-    def showSchematicDFA(self, filename):
+    def showSchematicDFA(self):
         g = graphviz.Digraph(format='png')
         g.node('fake', style='invisible')
         for state in self.states:
@@ -74,6 +73,10 @@ class DFA(FA):
         DIRECTORY_NAME = "Outputs"
         if not os.path.exists(DIRECTORY_NAME):
             os.makedirs(DIRECTORY_NAME)
+        filename = max(os.listdir(DIRECTORY_NAME))
+        filename = filename.split('.')[0]
+        filename = int(filename.split('file')[1]) + 1
+        filename = f'file{filename}'
 
         g.render(directory='.\\Outputs\\', view=True,
                  format='png', filename=filename + '.gv')
@@ -94,18 +97,10 @@ class DFA(FA):
 
     @staticmethod
     def _stringify_states(states):
-        """Stringify the given set of states as a single state name."""
         return '{{{}}}'.format(','.join(sorted(states)))
 
-    def MakeSimpleDFA(self):
-        """
-        Create a minimal DFA which accepts the same inputs as this DFA.
+    def minify(self):
 
-        First, non-reachable states are removed.
-        Then, similiar states are merged.
-        Its algorithm is based on Myphill-Nerode theorem
-        https://www.tutorialspoint.com/automata_theory/dfa_minimization.htm
-        """
         new_dfa = DFA(self._parse_set(self.states), self._parse_transitions(self.transitions), str(
             self.initial_state), self._parse_set(self.final_states), self._parse_set(self.input_symbols))
         new_dfa._remove_unreachable_states()
@@ -116,7 +111,6 @@ class DFA(FA):
         return new_dfa
 
     def retrieve_reachable_states(self):
-        """Compute the states which are reachable from the initial state."""
         reachable_states = set()
         states_to_check = queue.Queue()
         states_checked = set()
@@ -131,20 +125,13 @@ class DFA(FA):
         return reachable_states
 
     def _remove_unreachable_states(self):
-        """Remove states which are not reachable from the initial state."""
         reachable_states = self.retrieve_reachable_states()
         unreachable_states = self.states - reachable_states
         for state in unreachable_states:
             self.states.remove(state)
             del self.transitions[state]
 
-
     def initialize_states_table(self):
-        """
-        Create a "markable table" with all combinatations of two states.
-
-        This is a dict with frozensets of states as keys and `False` as value.
-        """
         states_list = list(self.states)
         table = {}
         for i in range(len(states_list)):
@@ -153,7 +140,6 @@ class DFA(FA):
         return table
 
     def check_final_and_non_finals(self, table):
-        """Mark pairs of states if one is final and one is not."""
         for s in table:
             x = list(s)
             if (x[0] in self.final_states and x[1] not in self.final_states) \
@@ -165,14 +151,7 @@ class DFA(FA):
         #             table[s] = True
 
     def check_remained_mergable_tuple(self, table):
-        """
-        Mark additional state pairs.
 
-        A non-marked pair of two states q, q_ will be marked
-        if there is an input_symbol a for which the pair
-        transition(q, a), transition(q_, a) is marked.
-        """
-        can_iterate = True
         while can_iterate:
             can_iterate = False
             for s in self.get_unchecked_combinations(table):

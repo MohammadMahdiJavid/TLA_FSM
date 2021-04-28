@@ -31,3 +31,27 @@ def test_findRegExp_1():
 
     # regex = 'a(b*(bab)*)*'
     nfa.findRegExp()
+
+
+def test_findRegExp_1():
+    states = "{1, 2, 3, 4}"
+    input_symbols = "{a, b}"
+    final_states = '{3, 4}'
+    transition_count = 9
+    transitions = [
+        '1, 2, a',
+        '1, 3, b',
+        '2, 1, a',
+        '2, 3, ',
+        '3, 3, b',
+        '3, 4, b',
+        '4, 3, a',
+        '4, 2, a', ]
+    initial_state = "1"
+    nfa = NFA(states=states,
+              input_symbols=input_symbols,
+              transitions=transitions,
+              initial_state=initial_state,
+              final_states=final_states,)
+    nfa.showSchematicNFA()
+    nfa.findRegExp()

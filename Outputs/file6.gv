@@ -1,0 +1,7 @@
+digraph {
+	fake0 [style=invisible]
+	NEWS [root=true]
+	NEWF [shape=doublecircle]
+	fake0 -> NEWS [style=bold]
+	NEWS -> NEWF [label="(a(aa)*(ba(aa)* + ba + ba(aa)*ab + b)*b) + (a(aa)*(ba(aa)* + ba + ba(aa)*ab + b)*) + (a(aa)*ab(ba(aa)* + ba + ba(aa)*ab + b)*b) + (a(aa)*ab(ba(aa)* + ba + ba(aa)*ab + b)*) + (b(ba(aa)* + ba + ba(aa)*ab + b)*b) + (b(ba(aa)* + ba + ba(aa)*ab + b)*)"]
+}

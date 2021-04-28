@@ -22,7 +22,7 @@ def test_showSchematicDFA_1():
               initial_state=initial_state,
               final_states=final_states,
               input_symbols=input_symbols)
-    dfa.showSchematicDFA("file3")
+    dfa.showSchematicDFA()
 
 
 def test_showSchematicDFA_2():
@@ -46,4 +46,4 @@ def test_showSchematicDFA_2():
               initial_state=initial_state,
               final_states=final_states,)
     dfa = nfa.createEquivalentDFA()
-    dfa.showSchematicDFA('file4')
+    dfa.showSchematicDFA()
