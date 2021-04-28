@@ -19,7 +19,7 @@ def test_showSchematicNFA_1():
               transitions=transitions,
               initial_state=initial_state,
               final_states=final_states,)
-    nfa.showSchematicNFA('file1')
+    nfa.showSchematicNFA()
 
 
 def test_showSchematicNFA_2():
@@ -42,4 +42,4 @@ def test_showSchematicNFA_2():
               transitions=transitions,
               initial_state=initial_state,
               final_states=final_states,)
-    nfa.showSchematicNFA('file2')
+    nfa.showSchematicNFA()
