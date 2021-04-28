@@ -108,8 +108,8 @@ class NFA (FA):
         validation_generator = self._isAcceptByNFA_stepwise(input_str)
         for last_states, is_valid in validation_generator:
             if not is_valid:
-                return last_states, False
-        return last_states, True
+                return False
+        return True
 
     @classmethod
     def _add_nfa_states_from_queue(cls, nfa, current_states,
@@ -184,7 +184,7 @@ class NFA (FA):
         dfa_symbols = nfa.input_symbols
         dfa_transitions = {}
         # equivalent DFA states states
-        nfa_initial_states = nfa._get_lambda_closure(nfa.initial_state)
+        nfa_initial_states = nfa._get_lambda(nfa.initial_state)
         dfa_initial_state = cls._stringify_states(nfa_initial_states)
         dfa_final_states = set()
 
@@ -314,13 +314,13 @@ class NFA (FA):
             self.states.add(new_final_name)
             self.final_states = {new_final_name}
         self.state_removal()
-        self.showSchematicNFA()
+        # self.showSchematicNFA()
         key = next(iter(self.transitions.keys()))
         final = set([next(iter(val))
                      for val in self.transitions[key].values() if len(val) != 0]).pop()
         label_final = self._get_final_label(final, key)
         self.transitions[key] = {label_final: {final}}
-        self.showSchematicNFA()
+        # self.showSchematicNFA()
 
     def _get_final_label(self, final, key):
         result = []
@@ -331,22 +331,28 @@ class NFA (FA):
 
     def get_incoming_edges(self, middle_state):
         states = set()
-        for start in self.transitions:
-            for alphabet in self.transitions[start]:
-                # middle state tosh nabod
-                if not middle_state in self.transitions[start][alphabet]:
-                    continue
-                if start == middle_state:  # self loop
-                    continue
-                states.add((start, alphabet))
+        try :
+            for start in self.transitions:
+                for alphabet in self.transitions[start]:
+                    # middle state tosh nabod
+                    if not middle_state in self.transitions[start][alphabet]:
+                        continue
+                    if start == middle_state:  # self loop
+                        continue
+                    states.add((start, alphabet))
+        except:
+            pass
         return states
 
     def get_outgoing_edges(self, middle_state):
         states = set()
-        for alphabet in self.transitions[middle_state]:
-            for dst in self.transitions[middle_state][alphabet]:
-                if dst != middle_state:
-                    states.add((dst, alphabet))
+        try :
+            for alphabet in self.transitions[middle_state]:
+                for dst in self.transitions[middle_state][alphabet]:
+                    if dst != middle_state:
+                        states.add((dst, alphabet))
+        except:
+            pass
         return states
 
     def delete_all_related_to_middle_state(self, middle_state):
@@ -356,7 +362,7 @@ class NFA (FA):
                     neighbors.remove(middle_state)
 
     def state_removal(self):
-        middle_state = '4'
+        middle_state = self.pick_non_final_initial_state()
         # self.pick_non_final_initial_state()
         while middle_state:
             '''
@@ -368,7 +374,10 @@ class NFA (FA):
                     self.traverese_income_to_outgo(middle_state, income, outgo)
                     # return answer how to go from income to outgo
             self.states.remove(middle_state)
-            del self.transitions[middle_state]
+            try :
+                del self.transitions[middle_state]
+            except :
+                pass
             self.delete_all_related_to_middle_state(middle_state)
             middle_state = self.pick_non_final_initial_state()
 

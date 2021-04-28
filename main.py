@@ -17,7 +17,7 @@ class Main:
             elif inp == "showSchematicNFA":
                 obj.showSchematicNFA()
             inp = input("which function to run? ").lower()
-
+    @staticmethod
     def run_dfa(obj: DFA):
         inp = input("which function to run? ").lower()
         while inp != "Exit":
@@ -34,12 +34,17 @@ class Main:
         states = input("states? (e.g. {q0, q1})? ")
         input_symbols = input("language? (e.g. {a, b})? ")
         transition_count = int(input("transition count? "))
+        initial_state = "q0"
         transitions = []
         for i in range(transition_count):
             transitions.append(input("transition? (e.g. q0,q1,a)? "))
         final_states = input("language? (e.g. {a, b})? ")
         nfa = NFA(
-
+            states = states ,
+            transitions=transitions , 
+            initial_state=initial_state , 
+            final_states=final_states,
+            input_symbols=input_symbols
         )
 
     @staticmethod
@@ -51,6 +56,14 @@ class Main:
         for i in range(transition_count):
             transitions.append(input("transition? (e.g. q0,q1,a)? "))
         final_states = input("language? (e.g. {a, b})? ")
+        initial_state = "q0"
+        dfa = DFA(
+            states = states ,
+            transitions=transitions , 
+            initial_state=initial_state , 
+            final_states=final_states,
+            input_symbols=input_symbols
+        )
 
     @staticmethod
     def getInputs():

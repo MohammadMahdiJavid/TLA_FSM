@@ -21,19 +21,19 @@ def test_check_whole():
               transitions=transitions,
               initial_state=initial_state,
               final_states=final_states,)
-    assert not nfa.isAcceptByNFA("")[1]
-    assert nfa.isAcceptByNFA("abb")[1]
-    assert not nfa.isAcceptByNFA("abaa")[1]
-    assert nfa.isAcceptByNFA("abab")[1]
-    assert nfa.isAcceptByNFA("aaaaaa")[1]
+    assert not nfa.isAcceptByNFA("")
+    assert nfa.isAcceptByNFA("abb")
+    assert not nfa.isAcceptByNFA("abaa")
+    assert nfa.isAcceptByNFA("abab")
+    assert nfa.isAcceptByNFA("aaaaaa")
     new_dfa = nfa.createEquivalentDFA()
     # nfa.showSchematicNFA("nfa-diagram")
-    assert not new_dfa.isAcceptByDFA("")[1]
-    assert new_dfa.isAcceptByDFA("abb")[1]
-    assert not new_dfa.isAcceptByDFA("abaa")[1]
-    assert new_dfa.isAcceptByDFA("abab")[1]
-    assert new_dfa.isAcceptByDFA("aaaaaa")[1]
+    assert not new_dfa.isAcceptByDFA("")
+    assert new_dfa.isAcceptByDFA("abb")
+    assert not new_dfa.isAcceptByDFA("abaa")
+    assert new_dfa.isAcceptByDFA("abab")
+    assert new_dfa.isAcceptByDFA("aaaaaa")
     minimized_dfa = new_dfa.MakeSimpleDFA()
     # new_dfa.showSchematicDFA("dfa-diagram")
-    regex = nfa.findRegExp()
+#     regex = nfa.findRegExp()
 

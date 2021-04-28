@@ -46,8 +46,8 @@ class DFA(FA):
         validation_generator = self._isAcceptByDFA_stepwise(input_str)
         for last_states, is_valid in validation_generator:
             if not is_valid:
-                return last_states, False
-        return last_states, True
+                return False
+        return True
 
     def showSchematicDFA(self):
         g = graphviz.Digraph(format='png')
@@ -99,7 +99,7 @@ class DFA(FA):
     def _stringify_states(states):
         return '{{{}}}'.format(','.join(sorted(states)))
 
-    def minify(self):
+    def MakeSimpleDFA(self):
 
         new_dfa = DFA(self._parse_set(self.states), self._parse_transitions(self.transitions), str(
             self.initial_state), self._parse_set(self.final_states), self._parse_set(self.input_symbols))
@@ -151,7 +151,7 @@ class DFA(FA):
         #             table[s] = True
 
     def check_remained_mergable_tuple(self, table):
-
+        can_iterate = True
         while can_iterate:
             can_iterate = False
             for s in self.get_unchecked_combinations(table):
