@@ -21,4 +21,4 @@ def test_minimize_DFA():
               initial_state=initial_state,
               final_states=final_states,)
     dfa = nfa.createEquivalentDFA()
-    dfa.minify()
+    dfa.MakeSimpleDFA()

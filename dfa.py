@@ -97,7 +97,7 @@ class DFA(FA):
         """Stringify the given set of states as a single state name."""
         return '{{{}}}'.format(','.join(sorted(states)))
 
-    def minify(self):
+    def MakeSimpleDFA(self):
         """
         Create a minimal DFA which accepts the same inputs as this DFA.
 
